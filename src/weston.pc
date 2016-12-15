@@ -1,0 +1,11 @@
+prefix=/home/zw/work/ubuntu/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+libexecdir=${exec_prefix}/libexec
+pkglibexecdir=${libexecdir}/weston
+
+Name: Weston Plugin API
+Description: Header files for Weston plugin development
+Version: 1.8.0
+Cflags: -I${includedir}

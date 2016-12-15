@@ -1,0 +1,459 @@
+src/rdp_backend_la-compositor-rdp.lo: src/compositor-rdp.c \
+ /usr/include/stdc-predef.h config.h /usr/include/errno.h \
+ /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+ /usr/include/x86_64-linux-gnu/bits/wordsize.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
+ /usr/include/x86_64-linux-gnu/bits/errno.h /usr/include/linux/errno.h \
+ /usr/include/x86_64-linux-gnu/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/stdlib.h /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stddef.h \
+ /usr/include/x86_64-linux-gnu/bits/waitflags.h \
+ /usr/include/x86_64-linux-gnu/bits/waitstatus.h /usr/include/endian.h \
+ /usr/include/x86_64-linux-gnu/bits/endian.h \
+ /usr/include/x86_64-linux-gnu/bits/byteswap.h \
+ /usr/include/x86_64-linux-gnu/bits/types.h \
+ /usr/include/x86_64-linux-gnu/bits/typesizes.h \
+ /usr/include/x86_64-linux-gnu/bits/byteswap-16.h /usr/include/xlocale.h \
+ /usr/include/x86_64-linux-gnu/sys/types.h /usr/include/time.h \
+ /usr/include/x86_64-linux-gnu/sys/select.h \
+ /usr/include/x86_64-linux-gnu/bits/select.h \
+ /usr/include/x86_64-linux-gnu/bits/sigset.h \
+ /usr/include/x86_64-linux-gnu/bits/time.h \
+ /usr/include/x86_64-linux-gnu/bits/select2.h \
+ /usr/include/x86_64-linux-gnu/sys/sysmacros.h \
+ /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h /usr/include/alloca.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib.h \
+ /usr/local/include/winpr/string.h /usr/include/wchar.h \
+ /usr/include/stdio.h /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdarg.h \
+ /usr/include/x86_64-linux-gnu/bits/wchar.h \
+ /usr/include/x86_64-linux-gnu/bits/wchar2.h \
+ /usr/local/include/winpr/winpr.h /usr/local/include/winpr/wtypes.h \
+ /usr/local/include/winpr/windows.h /usr/local/include/winpr/spec.h \
+ /usr/local/include/winpr/platform.h /usr/local/include/winpr/user.h \
+ /usr/include/linux/input.h /usr/include/x86_64-linux-gnu/sys/time.h \
+ /usr/include/x86_64-linux-gnu/sys/ioctl.h \
+ /usr/include/x86_64-linux-gnu/bits/ioctls.h \
+ /usr/include/x86_64-linux-gnu/asm/ioctls.h \
+ /usr/include/asm-generic/ioctls.h /usr/include/linux/ioctl.h \
+ /usr/include/x86_64-linux-gnu/asm/ioctl.h \
+ /usr/include/asm-generic/ioctl.h \
+ /usr/include/x86_64-linux-gnu/bits/ioctl-types.h \
+ /usr/include/x86_64-linux-gnu/sys/ttydefaults.h \
+ /usr/include/linux/types.h /usr/include/x86_64-linux-gnu/asm/types.h \
+ /usr/include/asm-generic/types.h /usr/include/asm-generic/int-ll64.h \
+ /usr/include/x86_64-linux-gnu/asm/bitsperlong.h \
+ /usr/include/asm-generic/bitsperlong.h /usr/include/linux/posix_types.h \
+ /usr/include/linux/stddef.h \
+ /usr/include/x86_64-linux-gnu/asm/posix_types.h \
+ /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
+ /usr/include/asm-generic/posix_types.h \
+ /usr/local/include/freerdp/freerdp.h /usr/local/include/freerdp/api.h \
+ /usr/local/include/freerdp/types.h /usr/local/include/winpr/wtsapi.h \
+ /usr/local/include/winpr/file.h /usr/local/include/winpr/nt.h \
+ /usr/local/include/winpr/io.h /usr/local/include/winpr/error.h \
+ /usr/local/include/freerdp/settings.h \
+ /usr/local/include/freerdp/message.h \
+ /usr/local/include/winpr/collections.h /usr/include/libio.h \
+ /usr/include/_G_config.h /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/sys_errlist.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio2.h \
+ /usr/local/include/winpr/crt.h /usr/local/include/winpr/string.h \
+ /usr/local/include/winpr/heap.h /usr/local/include/winpr/synch.h \
+ /usr/local/include/winpr/handle.h /usr/local/include/winpr/security.h \
+ /usr/local/include/winpr/stream.h \
+ /usr/local/include/winpr/endian-winpr.h \
+ /usr/local/include/freerdp/error.h /usr/local/include/freerdp/event.h \
+ /usr/local/include/freerdp/codecs.h \
+ /usr/local/include/freerdp/codec/color.h \
+ /usr/local/include/freerdp/codec/rfx.h \
+ /usr/local/include/freerdp/constants.h \
+ /usr/local/include/freerdp/codec/nsc.h \
+ /usr/local/include/freerdp/codec/h264.h \
+ /usr/local/include/freerdp/channels/rdpgfx.h \
+ /usr/local/include/freerdp/dvc.h /usr/local/include/freerdp/addin.h \
+ /usr/local/include/freerdp/codec/clear.h \
+ /usr/local/include/freerdp/codec/planar.h \
+ /usr/local/include/freerdp/codec/bitmap.h \
+ /usr/local/include/freerdp/codec/interleaved.h \
+ /usr/local/include/freerdp/codec/progressive.h \
+ /usr/local/include/winpr/wlog.h /usr/local/include/winpr/thread.h \
+ /usr/local/include/freerdp/metrics.h \
+ /usr/local/include/freerdp/extension.h \
+ /usr/local/include/freerdp/input.h /usr/local/include/freerdp/scancode.h \
+ /usr/local/include/winpr/input.h /usr/local/include/freerdp/update.h \
+ /usr/local/include/freerdp/rail.h /usr/local/include/winpr/wnd.h \
+ /usr/local/include/freerdp/graphics.h \
+ /usr/local/include/freerdp/utils/pcap.h \
+ /usr/local/include/freerdp/primary.h \
+ /usr/local/include/freerdp/secondary.h \
+ /usr/local/include/freerdp/altsec.h /usr/local/include/freerdp/window.h \
+ /usr/local/include/freerdp/pointer.h \
+ /usr/local/include/freerdp/autodetect.h \
+ /usr/local/include/freerdp/client.h \
+ /usr/local/include/freerdp/listener.h /usr/local/include/freerdp/peer.h \
+ /usr/local/include/winpr/sspi.h \
+ /usr/local/include/freerdp/locale/keyboard.h src/compositor.h \
+ /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdbool.h \
+ /usr/include/x86_64-linux-gnu/bits/timex.h \
+ /usr/include/pixman-1/pixman.h /usr/include/pixman-1/pixman-version.h \
+ /usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h /usr/include/stdint.h \
+ /usr/include/xkbcommon/xkbcommon.h \
+ /usr/include/xkbcommon/xkbcommon-names.h \
+ /usr/include/xkbcommon/xkbcommon-keysyms.h \
+ /usr/include/xkbcommon/xkbcommon-compat.h \
+ /home/zw/work/ubuntu/local/include/wayland-server.h \
+ /home/zw/work/ubuntu/local/include/wayland-server-core.h \
+ /home/zw/work/ubuntu/local/include/wayland-util.h /usr/include/math.h \
+ /usr/include/x86_64-linux-gnu/bits/huge_val.h \
+ /usr/include/x86_64-linux-gnu/bits/huge_valf.h \
+ /usr/include/x86_64-linux-gnu/bits/huge_vall.h \
+ /usr/include/x86_64-linux-gnu/bits/inf.h \
+ /usr/include/x86_64-linux-gnu/bits/nan.h \
+ /usr/include/x86_64-linux-gnu/bits/mathdef.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
+ /usr/include/x86_64-linux-gnu/bits/mathinline.h /usr/include/inttypes.h \
+ /home/zw/work/ubuntu/local/include/wayland-version.h \
+ /home/zw/work/ubuntu/local/include/wayland-server-protocol.h \
+ /home/zw/work/ubuntu/local/include/wayland-server.h src/version.h \
+ shared/matrix.h shared/config-parser.h shared/zalloc.h \
+ src/timeline-object.h src/pixman-renderer.h
+
+/usr/include/stdc-predef.h:
+
+config.h:
+
+/usr/include/errno.h:
+
+/usr/include/features.h:
+
+/usr/include/x86_64-linux-gnu/sys/cdefs.h:
+
+/usr/include/x86_64-linux-gnu/bits/wordsize.h:
+
+/usr/include/x86_64-linux-gnu/gnu/stubs.h:
+
+/usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
+
+/usr/include/x86_64-linux-gnu/bits/errno.h:
+
+/usr/include/linux/errno.h:
+
+/usr/include/x86_64-linux-gnu/asm/errno.h:
+
+/usr/include/asm-generic/errno.h:
+
+/usr/include/asm-generic/errno-base.h:
+
+/usr/include/stdlib.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stddef.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitflags.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
+
+/usr/include/endian.h:
+
+/usr/include/x86_64-linux-gnu/bits/endian.h:
+
+/usr/include/x86_64-linux-gnu/bits/byteswap.h:
+
+/usr/include/x86_64-linux-gnu/bits/types.h:
+
+/usr/include/x86_64-linux-gnu/bits/typesizes.h:
+
+/usr/include/x86_64-linux-gnu/bits/byteswap-16.h:
+
+/usr/include/xlocale.h:
+
+/usr/include/x86_64-linux-gnu/sys/types.h:
+
+/usr/include/time.h:
+
+/usr/include/x86_64-linux-gnu/sys/select.h:
+
+/usr/include/x86_64-linux-gnu/bits/select.h:
+
+/usr/include/x86_64-linux-gnu/bits/sigset.h:
+
+/usr/include/x86_64-linux-gnu/bits/time.h:
+
+/usr/include/x86_64-linux-gnu/bits/select2.h:
+
+/usr/include/x86_64-linux-gnu/sys/sysmacros.h:
+
+/usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
+
+/usr/include/alloca.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib.h:
+
+/usr/local/include/winpr/string.h:
+
+/usr/include/wchar.h:
+
+/usr/include/stdio.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdarg.h:
+
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
+
+/usr/include/x86_64-linux-gnu/bits/wchar2.h:
+
+/usr/local/include/winpr/winpr.h:
+
+/usr/local/include/winpr/wtypes.h:
+
+/usr/local/include/winpr/windows.h:
+
+/usr/local/include/winpr/spec.h:
+
+/usr/local/include/winpr/platform.h:
+
+/usr/local/include/winpr/user.h:
+
+/usr/include/linux/input.h:
+
+/usr/include/x86_64-linux-gnu/sys/time.h:
+
+/usr/include/x86_64-linux-gnu/sys/ioctl.h:
+
+/usr/include/x86_64-linux-gnu/bits/ioctls.h:
+
+/usr/include/x86_64-linux-gnu/asm/ioctls.h:
+
+/usr/include/asm-generic/ioctls.h:
+
+/usr/include/linux/ioctl.h:
+
+/usr/include/x86_64-linux-gnu/asm/ioctl.h:
+
+/usr/include/asm-generic/ioctl.h:
+
+/usr/include/x86_64-linux-gnu/bits/ioctl-types.h:
+
+/usr/include/x86_64-linux-gnu/sys/ttydefaults.h:
+
+/usr/include/linux/types.h:
+
+/usr/include/x86_64-linux-gnu/asm/types.h:
+
+/usr/include/asm-generic/types.h:
+
+/usr/include/asm-generic/int-ll64.h:
+
+/usr/include/x86_64-linux-gnu/asm/bitsperlong.h:
+
+/usr/include/asm-generic/bitsperlong.h:
+
+/usr/include/linux/posix_types.h:
+
+/usr/include/linux/stddef.h:
+
+/usr/include/x86_64-linux-gnu/asm/posix_types.h:
+
+/usr/include/x86_64-linux-gnu/asm/posix_types_64.h:
+
+/usr/include/asm-generic/posix_types.h:
+
+/usr/local/include/freerdp/freerdp.h:
+
+/usr/local/include/freerdp/api.h:
+
+/usr/local/include/freerdp/types.h:
+
+/usr/local/include/winpr/wtsapi.h:
+
+/usr/local/include/winpr/file.h:
+
+/usr/local/include/winpr/nt.h:
+
+/usr/local/include/winpr/io.h:
+
+/usr/local/include/winpr/error.h:
+
+/usr/local/include/freerdp/settings.h:
+
+/usr/local/include/freerdp/message.h:
+
+/usr/local/include/winpr/collections.h:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
+
+/usr/include/x86_64-linux-gnu/bits/sys_errlist.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdio.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdio2.h:
+
+/usr/local/include/winpr/crt.h:
+
+/usr/local/include/winpr/string.h:
+
+/usr/local/include/winpr/heap.h:
+
+/usr/local/include/winpr/synch.h:
+
+/usr/local/include/winpr/handle.h:
+
+/usr/local/include/winpr/security.h:
+
+/usr/local/include/winpr/stream.h:
+
+/usr/local/include/winpr/endian-winpr.h:
+
+/usr/local/include/freerdp/error.h:
+
+/usr/local/include/freerdp/event.h:
+
+/usr/local/include/freerdp/codecs.h:
+
+/usr/local/include/freerdp/codec/color.h:
+
+/usr/local/include/freerdp/codec/rfx.h:
+
+/usr/local/include/freerdp/constants.h:
+
+/usr/local/include/freerdp/codec/nsc.h:
+
+/usr/local/include/freerdp/codec/h264.h:
+
+/usr/local/include/freerdp/channels/rdpgfx.h:
+
+/usr/local/include/freerdp/dvc.h:
+
+/usr/local/include/freerdp/addin.h:
+
+/usr/local/include/freerdp/codec/clear.h:
+
+/usr/local/include/freerdp/codec/planar.h:
+
+/usr/local/include/freerdp/codec/bitmap.h:
+
+/usr/local/include/freerdp/codec/interleaved.h:
+
+/usr/local/include/freerdp/codec/progressive.h:
+
+/usr/local/include/winpr/wlog.h:
+
+/usr/local/include/winpr/thread.h:
+
+/usr/local/include/freerdp/metrics.h:
+
+/usr/local/include/freerdp/extension.h:
+
+/usr/local/include/freerdp/input.h:
+
+/usr/local/include/freerdp/scancode.h:
+
+/usr/local/include/winpr/input.h:
+
+/usr/local/include/freerdp/update.h:
+
+/usr/local/include/freerdp/rail.h:
+
+/usr/local/include/winpr/wnd.h:
+
+/usr/local/include/freerdp/graphics.h:
+
+/usr/local/include/freerdp/utils/pcap.h:
+
+/usr/local/include/freerdp/primary.h:
+
+/usr/local/include/freerdp/secondary.h:
+
+/usr/local/include/freerdp/altsec.h:
+
+/usr/local/include/freerdp/window.h:
+
+/usr/local/include/freerdp/pointer.h:
+
+/usr/local/include/freerdp/autodetect.h:
+
+/usr/local/include/freerdp/client.h:
+
+/usr/local/include/freerdp/listener.h:
+
+/usr/local/include/freerdp/peer.h:
+
+/usr/local/include/winpr/sspi.h:
+
+/usr/local/include/freerdp/locale/keyboard.h:
+
+src/compositor.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdbool.h:
+
+/usr/include/x86_64-linux-gnu/bits/timex.h:
+
+/usr/include/pixman-1/pixman.h:
+
+/usr/include/pixman-1/pixman-version.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stdint.h:
+
+/usr/include/stdint.h:
+
+/usr/include/xkbcommon/xkbcommon.h:
+
+/usr/include/xkbcommon/xkbcommon-names.h:
+
+/usr/include/xkbcommon/xkbcommon-keysyms.h:
+
+/usr/include/xkbcommon/xkbcommon-compat.h:
+
+/home/zw/work/ubuntu/local/include/wayland-server.h:
+
+/home/zw/work/ubuntu/local/include/wayland-server-core.h:
+
+/home/zw/work/ubuntu/local/include/wayland-util.h:
+
+/usr/include/math.h:
+
+/usr/include/x86_64-linux-gnu/bits/huge_val.h:
+
+/usr/include/x86_64-linux-gnu/bits/huge_valf.h:
+
+/usr/include/x86_64-linux-gnu/bits/huge_vall.h:
+
+/usr/include/x86_64-linux-gnu/bits/inf.h:
+
+/usr/include/x86_64-linux-gnu/bits/nan.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathdef.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathinline.h:
+
+/usr/include/inttypes.h:
+
+/home/zw/work/ubuntu/local/include/wayland-version.h:
+
+/home/zw/work/ubuntu/local/include/wayland-server-protocol.h:
+
+/home/zw/work/ubuntu/local/include/wayland-server.h:
+
+src/version.h:
+
+shared/matrix.h:
+
+shared/config-parser.h:
+
+shared/zalloc.h:
+
+src/timeline-object.h:
+
+src/pixman-renderer.h:

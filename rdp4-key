@@ -1,0 +1,55 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 191403218 (0xb6894d2)
+    Signature Algorithm: sha1WithRSAEncryption
+        Issuer: CN=zw-OptiPlex-3020
+        Validity
+            Not Before: Nov 10 06:37:06 2016 GMT
+            Not After : Nov 10 06:37:06 2017 GMT
+        Subject: CN=zw-OptiPlex-3020
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:d7:d5:d1:30:a3:97:10:50:f5:3e:eb:fa:cc:d5:
+                    f5:5b:5d:f7:d3:70:71:f7:af:59:5c:d6:c3:ae:33:
+                    32:24:21:d4:9d:45:c1:87:ef:e9:7b:99:02:e1:b2:
+                    10:10:20:63:c8:6b:7e:77:5e:4d:6d:aa:50:fa:57:
+                    aa:74:1e:31:13:85:43:ed:57:f7:72:6f:fa:75:c0:
+                    3b:f5:49:8e:bb:3a:38:a4:0c:c3:11:53:d4:e6:5c:
+                    a7:b0:e1:68:15:2c:8d:3b:d6:e5:d8:0a:0f:1c:75:
+                    8c:c4:ab:92:65:c8:47:4a:bb:ce:0e:60:55:77:9a:
+                    27:2c:b9:d0:6f:c1:3d:ba:3a:c1:71:b9:7f:2e:df:
+                    c6:7a:e2:21:30:7d:4c:47:9d:15:d2:14:d0:1d:81:
+                    fc:82:bf:ce:68:ee:9b:ee:d8:48:ad:6d:64:a7:05:
+                    4e:0e:ba:f9:31:25:3c:5c:1b:c5:07:27:55:1b:6e:
+                    f6:51:dd:d2:03:57:a9:42:61:af:7d:2c:5c:28:8d:
+                    4f:9c:d7:c0:4c:66:0b:61:e4:c2:df:da:da:51:ee:
+                    ef:99:c2:70:17:3d:3b:67:df:b5:1a:27:8c:0f:ea:
+                    c0:cb:d2:e0:65:2f:b7:ba:01:7f:8c:f1:ae:8a:59:
+                    56:5e:3d:1a:2e:f8:18:c4:d9:93:d2:a7:06:b8:5b:
+                    b4:0f
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication
+            X509v3 Key Usage: 
+                Key Encipherment, Data Encipherment
+    Signature Algorithm: sha1WithRSAEncryption
+         53:32:a4:90:a1:fe:1d:9d:d1:8b:6b:c6:10:56:20:32:11:15:
+         c0:0e:e3:22:5a:d0:2b:77:91:6a:2e:13:33:7e:73:5f:31:18:
+         28:b5:6f:e7:c0:59:a6:f0:ed:b5:0d:58:5f:2d:ea:58:d8:ae:
+         69:00:fc:96:00:70:8d:41:e2:e7:e6:f0:be:c6:f8:ec:4d:d6:
+         ce:2a:91:c9:5d:a3:e7:e7:44:10:11:0e:a5:cd:1f:66:eb:21:
+         76:d9:2d:89:08:c4:f0:a3:1d:87:cf:e3:60:f5:37:08:b2:7b:
+         87:25:b9:9b:75:e5:d0:94:cf:16:29:3b:80:20:31:2d:87:15:
+         12:4e:2d:94:bf:34:cf:5e:1f:86:2f:1c:6b:f8:13:47:ba:71:
+         78:0d:f9:3b:30:c4:4d:b9:58:e5:50:af:bc:cc:8f:e7:99:38:
+         b3:e2:2b:d8:57:6c:61:a5:31:7c:b0:c7:2c:cb:63:1a:d6:9b:
+         5e:0e:69:a6:01:c2:24:fa:34:75:cd:b8:29:1b:31:c0:dd:94:
+         37:39:6e:e9:a7:0e:6c:00:24:fb:c7:27:6e:34:30:0c:f4:28:
+         75:0d:cf:34:e3:cc:f9:34:48:d5:e6:25:76:f7:cd:7b:db:26:
+         af:62:2d:74:72:10:5c:86:5f:ec:10:cf:26:c0:a3:d3:6a:44:
+         fd:a4:d7:bf
+
