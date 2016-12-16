@@ -924,7 +924,7 @@ create_ivisurface(struct wlContextStruct *p_wlCtx,
 	ivisurf = ivi_application_surface_create(p_wlCtx->cmm->iviApplication,
 						 id_surface,
 						 p_wlCtx->wlSurface,
-						 "test_window");
+						 "test_window", 0);
 	if (ivisurf == NULL) {
 		fprintf(stderr, "Failed to create ivi_client_surface\n");
 		return;

@@ -92,6 +92,7 @@
       <arg name="ivi_id" type="uint"/>
       <arg name="surface" type="object" interface="wl_surface"/>
 	  <arg name="window_title" type="string"/>
+	  <arg name="zorder" type="uint"/>
 	  <arg name="id" type="new_id" interface="ivi_surface"/>
     </request>
 

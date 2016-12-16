@@ -362,7 +362,7 @@ create_ivi_surface(struct window *window, struct display *display)
 	uint32_t id_ivisurf = IVI_SURFACE_ID + (uint32_t)getpid();
 	window->ivi_surface =
 		ivi_application_surface_create(display->ivi_application,
-						   id_ivisurf, window->surface, "simple-egl");
+						   id_ivisurf, window->surface, "simple-egl", 10);
 
 	if (window->ivi_surface == NULL) {
 		fprintf(stderr, "Failed to create ivi_client_surface\n");

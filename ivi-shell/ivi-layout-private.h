@@ -33,6 +33,7 @@ struct ivi_layout_surface {
 	int32_t update_count;
 	uint32_t id_surface;
 	const char *window_title;
+	uint32_t zorder;
 
 	struct ivi_layout *layout;
 	struct weston_surface *surface;
@@ -169,7 +170,7 @@ ivi_layout_surface_configure(struct ivi_layout_surface *ivisurf,
 			     int32_t width, int32_t height);
 struct ivi_layout_surface*
 ivi_layout_surface_create(struct weston_surface *wl_surface,
-			  uint32_t id_surface);
+			  uint32_t id_surface, const char *window_title, uint32_t zorder);
 void
 ivi_layout_init_with_compositor(struct weston_compositor *ec);
 int32_t

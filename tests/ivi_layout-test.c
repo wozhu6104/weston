@@ -152,7 +152,7 @@ client_create_ivi_window(struct client *client, uint32_t ivi_id)
 	wnd = xzalloc(sizeof(*wnd));
 	wnd->wl_surface = wl_compositor_create_surface(client->wl_compositor);
 	wnd->ivi_surface = ivi_application_surface_create(iviapp, ivi_id,
-							  wnd->wl_surface, "layout-test");
+							  wnd->wl_surface, "layout-test", 0);
 	wnd->ivi_id = ivi_id;
 
 	return wnd;

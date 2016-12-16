@@ -4586,7 +4586,7 @@ window_create(struct display *display)
 		id_ivisurf = IVI_SURFACE_ID + (uint32_t)getpid();
 		window->ivi_surface =
 			ivi_application_surface_create(display->ivi_application,
-							   id_ivisurf, window->main_surface->surface, "test_window");
+							   id_ivisurf, window->main_surface->surface, "test_window", 0);
 		fail_on_null(window->ivi_surface);
 
 		ivi_surface_add_listener(window->ivi_surface,

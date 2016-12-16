@@ -204,6 +204,7 @@ application_surface_create(struct wl_client *client,
 			   uint32_t id_surface,
 			   struct wl_resource *surface_resource,
 			   const char *window_title,
+			   uint32_t zorder,
 			   uint32_t id)
 {
 	struct ivi_shell *shell = wl_resource_get_user_data(resource);
@@ -217,8 +218,8 @@ application_surface_create(struct wl_client *client,
 				    resource, IVI_APPLICATION_ERROR_ROLE) < 0)
 		return;
 
-	weston_log("layout_surface: (%s) id_surface(%d) \n", window_title, id_surface);
-	layout_surface = ivi_layout_surface_create(weston_surface, id_surface);
+	weston_log("layout_surface: (%s) id_surface(%d) zorder(%d) \n", window_title, id_surface, zorder);
+	layout_surface = ivi_layout_surface_create(weston_surface, id_surface, window_title, zorder);
 
 	/* check if id_ivi is already used for wl_surface*/
 	if (layout_surface == NULL){
@@ -229,8 +230,7 @@ application_surface_create(struct wl_client *client,
 		return;
 	}
 
-	layout_surface->window_title = window_title;
-	weston_log("layout_surface: (%s) id_surface(%d) \n", window_title, id_surface);
+	weston_log("layout_surface: (%s) id_surface(%d) zorder(%d) \n", layout_surface->window_title, layout_surface->id_surface, layout_surface->zorder);
 	ivisurf = zalloc(sizeof *ivisurf);
 	if (ivisurf == NULL) {
 		wl_resource_post_no_memory(resource);

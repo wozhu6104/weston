@@ -2540,9 +2540,10 @@ ivi_layout_layer_add_surface(struct ivi_layout_layer *ivilayer,
 	struct ivi_layout *layout = get_instance();
 	struct ivi_layout_surface *ivisurf = NULL;
 	struct ivi_layout_surface *next = NULL;
+	struct ivi_layout_surface *insert_position = NULL;
 	int is_surf_in_layer = 0;
 
-	weston_log("ivi_layout add surface id (%d) window_title (%s) \n", addsurf->id_surface, addsurf->window_title);
+	weston_log("ivi_layout add surface id (%d) window_title (%s) zorder(%d) \n", addsurf->id_surface, addsurf->window_title, addsurf->zorder);
 	if (ivilayer == NULL || addsurf == NULL) {
 		weston_log("ivi_layout_layer_add_surface: invalid argument\n");
 		return IVI_FAILED;
@@ -2554,14 +2555,39 @@ ivi_layout_layer_add_surface(struct ivi_layout_layer *ivilayer,
 		return IVI_SUCCEEDED;
 	}
 
+	/* get the insert position */
+	wl_list_for_each_safe(ivisurf, next, &layout->surface_list, link) {
+		if (addsurf->id_surface != ivisurf->id_surface  && insert_position == NULL && addsurf->zorder < ivisurf->zorder){
+			insert_position = ivisurf;
+			break;
+		}
+	}
+
+	wl_list_for_each_safe(ivisurf, next, &layout->surface_list, link) {
+		if(insert_position!=NULL && insert_position->zorder > ivisurf->zorder && ivisurf->zorder > addsurf->zorder)
+			insert_position = ivisurf;
+	}
+
 	wl_list_for_each_safe(ivisurf, next, &layout->surface_list, link) {
 		if (ivisurf->id_surface == addsurf->id_surface) {
 			if (!wl_list_empty(&ivisurf->pending.link)) {
 				wl_list_remove(&ivisurf->pending.link);
 			}
+			if (!wl_list_empty(&ivisurf->link)) {
+				wl_list_remove(&ivisurf->link);
+			}
+
+			wl_list_init(&ivisurf->link);
 			wl_list_init(&ivisurf->pending.link);
-			wl_list_insert(&ivilayer->pending.surface_list,
-				       &ivisurf->pending.link);
+
+			if(insert_position != NULL){
+				wl_list_insert(&insert_position->pending.link, &ivisurf->pending.link);
+				wl_list_insert(&insert_position->link, &ivisurf->link);
+			} else {
+				wl_list_insert(&ivilayer->pending.surface_list, &ivisurf->pending.link);
+				wl_list_insert(&layout->surface_list, &ivisurf->link);
+			}
+
 			break;
 		}
 	}
@@ -2772,7 +2798,7 @@ ivi_layout_surface_set_content_observer(struct ivi_layout_surface *ivisurf,
 
 struct ivi_layout_surface*
 ivi_layout_surface_create(struct weston_surface *wl_surface,
-			  uint32_t id_surface)
+			  uint32_t id_surface, const char* window_title, uint32_t zorder)
 {
 	struct ivi_layout *layout = get_instance();
 	struct ivi_layout_surface *ivisurf = NULL;
@@ -2802,6 +2828,8 @@ ivi_layout_surface_create(struct weston_surface *wl_surface,
 	wl_signal_init(&ivisurf->configured);
 	wl_list_init(&ivisurf->layer_list);
 	ivisurf->id_surface = id_surface;
+	ivisurf->window_title = window_title;
+	ivisurf->zorder = zorder;
 	ivisurf->layout = layout;
 
 	ivisurf->surface = wl_surface;
