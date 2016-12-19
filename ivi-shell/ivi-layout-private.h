@@ -32,7 +32,7 @@ struct ivi_layout_surface {
 	struct wl_list layer_list;
 	int32_t update_count;
 	uint32_t id_surface;
-	const char *window_title;
+	char *window_title;
 	uint32_t zorder;
 
 	struct ivi_layout *layout;
@@ -106,6 +106,7 @@ struct ivi_layout {
 		struct wl_signal created;
 		struct wl_signal removed;
 		struct wl_signal configure_changed;
+		struct wl_signal zorder_changed;
 	} surface_notification;
 
 	struct weston_layer layout_layer;
@@ -171,6 +172,8 @@ ivi_layout_surface_configure(struct ivi_layout_surface *ivisurf,
 struct ivi_layout_surface*
 ivi_layout_surface_create(struct weston_surface *wl_surface,
 			  uint32_t id_surface, const char *window_title, uint32_t zorder);
+int32_t
+ivi_layout_surface_set_zorder(const char *window_title, uint32_t zorder);
 void
 ivi_layout_init_with_compositor(struct weston_compositor *ec);
 int32_t

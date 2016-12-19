@@ -116,6 +116,7 @@ enum ivi_layout_notification_mask {
 	IVI_NOTIFICATION_ADD         = (1 << 9),
 	IVI_NOTIFICATION_REMOVE      = (1 << 10),
 	IVI_NOTIFICATION_CONFIGURE   = (1 << 11),
+	IVI_NOTIFICATION_ZORDER      = (1 << 12),
 	IVI_NOTIFICATION_ALL         = 0xFFFF
 };
 
@@ -162,6 +163,10 @@ typedef void (*surface_remove_notification_func)(
 			void *userdata);
 
 typedef void (*surface_configure_notification_func)(
+			struct ivi_layout_surface *ivisurf,
+			void *userdata);
+
+typedef void (*surface_set_zorder_notification_func)(
 			struct ivi_layout_surface *ivisurf,
 			void *userdata);
 
@@ -216,6 +221,17 @@ struct ivi_controller_interface {
 
 	void (*remove_notification_configure_surface)(
 				surface_configure_notification_func callback,
+				void *userdata);
+
+	/**
+	 * \brief register/unregister for notification when ivi_surface zorder is changed
+	 */
+	int32_t (*add_notification_set_zorder)(
+				surface_set_zorder_notification_func callback,
+				void *userdata);
+
+	void (*remove_notification_set_zorder)(
+				surface_set_zorder_notification_func callback,
 				void *userdata);
 
 	/**
@@ -649,6 +665,15 @@ struct ivi_controller_interface {
 	 */
 	int32_t (*layer_add_surface)(struct ivi_layout_layer *ivilayer,
 				     struct ivi_layout_surface *addsurf);
+
+	/**
+	 * \brief Set zorder of a ivi_surface which is currently managed in the ivilayer
+	 *
+	 * \return IVI_SUCCEEDED if the method call was successful
+	 * \return IVI_FAILED if the method call was failed
+	 */
+	int32_t (*layer_set_zorder)(struct ivi_layout_layer *ivilayer,
+					 struct ivi_layout_surface *addsurf);
 
 	/**
 	 * \brief Removes a surface from a layer which is currently managed by the service

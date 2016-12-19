@@ -96,6 +96,23 @@
 	  <arg name="id" type="new_id" interface="ivi_surface"/>
     </request>
 
+	<request name="set_zorder">
+	  <description summary="set ivi_surface zorder in ivi compositor">
+		 Set a ivi_surface zorder acoording to its window_title which is unique in ivi.
+		 This is just a interface for one app to control the other.
+	  </description>
+	  <arg name="window_title" type="string"/>
+	  <arg name="zorder" type="uint"/>
+	</request>
+
+	<event name="surface_add">
+	  <description summary="application surface add">
+		 The surface add event asked the app(hmi) to set the zorder according to the new
+		 surface's window_title.
+	  </description>
+	  <arg name="window_title" type="string"/>
+	  <arg name="zorder" type="int"/>
+	</event>
   </interface>
 
 </protocol>

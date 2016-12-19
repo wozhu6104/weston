@@ -1245,6 +1245,23 @@ surface_configure_changed(struct wl_listener *listener,
 		(ivisurface, configure_changed_callback->data);
 }
 
+static void
+surface_zorder_changed(struct wl_listener *listener, void *data)
+{
+	struct ivi_layout_surface *ivisurface = data;
+
+	struct listener_layout_notification *notification =
+		container_of(listener,
+				 struct listener_layout_notification,
+				 listener);
+
+	struct ivi_layout_notification_callback *created_callback =
+		notification->userdata;
+
+	((surface_set_zorder_notification_func)created_callback->callback)
+		(ivisurface, created_callback->data);
+}
+
 static int32_t
 add_notification(struct wl_signal *signal,
 		 wl_notify_func_t callback,
@@ -1466,6 +1483,39 @@ ivi_layout_remove_notification_configure_surface(surface_configure_notification_
 {
 	struct ivi_layout *layout = get_instance();
 	remove_notification(&layout->surface_notification.configure_changed.listener_list, callback, userdata);
+}
+
+static int32_t
+ivi_layout_add_notification_set_zorder(surface_set_zorder_notification_func callback,
+						  void *userdata)
+{
+	struct ivi_layout *layout = get_instance();
+	struct ivi_layout_notification_callback *configure_changed_callback = NULL;
+	if (callback == NULL) {
+		weston_log("ivi_layout_add_notification_configure_surface: invalid argument\n");
+		return IVI_FAILED;
+	}
+
+	configure_changed_callback = malloc(sizeof *configure_changed_callback);
+	if (configure_changed_callback == NULL) {
+		weston_log("fails to allocate memory\n");
+		return IVI_FAILED;
+	}
+
+	configure_changed_callback->callback = callback;
+	configure_changed_callback->data = userdata;
+
+	return add_notification(&layout->surface_notification.zorder_changed,
+				surface_zorder_changed,
+				configure_changed_callback);
+}
+
+static void
+ivi_layout_remove_notification_set_zorder(surface_set_zorder_notification_func callback,
+						 void *userdata)
+{
+	struct ivi_layout *layout = get_instance();
+	remove_notification(&layout->surface_notification.zorder_changed.listener_list, callback, userdata);
 }
 
 uint32_t
@@ -2543,7 +2593,6 @@ ivi_layout_layer_add_surface(struct ivi_layout_layer *ivilayer,
 	struct ivi_layout_surface *insert_position = NULL;
 	int is_surf_in_layer = 0;
 
-	weston_log("ivi_layout add surface id (%d) window_title (%s) zorder(%d) \n", addsurf->id_surface, addsurf->window_title, addsurf->zorder);
 	if (ivilayer == NULL || addsurf == NULL) {
 		weston_log("ivi_layout_layer_add_surface: invalid argument\n");
 		return IVI_FAILED;
@@ -2593,6 +2642,62 @@ ivi_layout_layer_add_surface(struct ivi_layout_layer *ivilayer,
 	}
 
 	ivilayer->event_mask |= IVI_NOTIFICATION_ADD;
+
+	return IVI_SUCCEEDED;
+}
+
+static int32_t
+ivi_layout_layer_set_zorder(struct ivi_layout_layer *ivilayer,
+				 struct ivi_layout_surface *addsurf)
+{
+	struct ivi_layout *layout = get_instance();
+	struct ivi_layout_surface *ivisurf = NULL;
+	struct ivi_layout_surface *next = NULL;
+	struct ivi_layout_surface *insert_position = NULL;
+
+	if (ivilayer == NULL || addsurf == NULL) {
+		weston_log("ivi_layout_layer_add_surface: invalid argument\n");
+		return IVI_FAILED;
+	}
+
+	/* get the insert position */
+	wl_list_for_each_safe(ivisurf, next, &layout->surface_list, link) {
+		if (addsurf->id_surface != ivisurf->id_surface  && insert_position == NULL && addsurf->zorder < ivisurf->zorder){
+			insert_position = ivisurf;
+			break;
+		}
+	}
+
+	wl_list_for_each_safe(ivisurf, next, &layout->surface_list, link) {
+		if(insert_position!=NULL && insert_position->zorder > ivisurf->zorder && ivisurf->zorder > addsurf->zorder)
+			insert_position = ivisurf;
+	}
+
+	wl_list_for_each_safe(ivisurf, next, &layout->surface_list, link) {
+		if (ivisurf->id_surface == addsurf->id_surface) {
+			if (!wl_list_empty(&ivisurf->pending.link)) {
+				wl_list_remove(&ivisurf->pending.link);
+			}
+			if (!wl_list_empty(&ivisurf->link)) {
+				wl_list_remove(&ivisurf->link);
+			}
+
+			wl_list_init(&ivisurf->link);
+			wl_list_init(&ivisurf->pending.link);
+
+			if(insert_position != NULL){
+				wl_list_insert(&insert_position->pending.link, &ivisurf->pending.link);
+				wl_list_insert(&insert_position->link, &ivisurf->link);
+			} else {
+				wl_list_insert(&ivilayer->pending.surface_list, &ivisurf->pending.link);
+				wl_list_insert(&layout->surface_list, &ivisurf->link);
+			}
+
+			break;
+		}
+	}
+
+	ivilayer->event_mask |= IVI_NOTIFICATION_ZORDER;
 
 	return IVI_SUCCEEDED;
 }
@@ -2828,7 +2933,12 @@ ivi_layout_surface_create(struct weston_surface *wl_surface,
 	wl_signal_init(&ivisurf->configured);
 	wl_list_init(&ivisurf->layer_list);
 	ivisurf->id_surface = id_surface;
-	ivisurf->window_title = window_title;
+	ivisurf->window_title = calloc(1, strlen(window_title));
+	if(ivisurf->window_title == NULL) {
+		weston_log("fails to allocate memory\n");
+		return NULL;
+	}
+	strncpy(ivisurf->window_title, window_title, strlen(window_title));
 	ivisurf->zorder = zorder;
 	ivisurf->layout = layout;
 
@@ -2874,6 +2984,26 @@ ivi_layout_surface_create(struct weston_surface *wl_surface,
 	return ivisurf;
 }
 
+int32_t
+ivi_layout_surface_set_zorder(const char *window_title, uint32_t zorder)
+{
+	struct ivi_layout *layout = get_instance();
+	struct ivi_layout_surface *ivisurf = NULL;
+
+	/* get the ivisurf with window title */
+	wl_list_for_each(ivisurf, &layout->surface_list, link) {
+		if(ivisurf->window_title){
+			if (!strcmp(ivisurf->window_title, window_title)) {
+				ivisurf->zorder = zorder;
+				wl_signal_emit(&layout->surface_notification.zorder_changed, ivisurf);
+				return IVI_SUCCEEDED;
+			}
+		}
+	}
+
+	return IVI_FAILED;
+}
+
 void
 ivi_layout_init_with_compositor(struct weston_compositor *ec)
 {
@@ -2891,6 +3021,7 @@ ivi_layout_init_with_compositor(struct weston_compositor *ec)
 	wl_signal_init(&layout->surface_notification.created);
 	wl_signal_init(&layout->surface_notification.removed);
 	wl_signal_init(&layout->surface_notification.configure_changed);
+	wl_signal_init(&layout->surface_notification.zorder_changed);
 
 	/* Add layout_layer at the last of weston_compositor.layer_list */
 	weston_layer_init(&layout->layout_layer, ec->layer_list.prev);
@@ -2924,6 +3055,8 @@ static struct ivi_controller_interface ivi_controller_interface = {
 	.remove_notification_remove_surface	= ivi_layout_remove_notification_remove_surface,
 	.add_notification_configure_surface	= ivi_layout_add_notification_configure_surface,
 	.remove_notification_configure_surface	= ivi_layout_remove_notification_configure_surface,
+	.add_notification_set_zorder        = ivi_layout_add_notification_set_zorder,
+	.remove_notification_set_zorder     = ivi_layout_remove_notification_set_zorder,
 	.get_surfaces				= ivi_layout_get_surfaces,
 	.get_id_of_surface			= ivi_layout_get_id_of_surface,
 	.get_surface_from_id			= ivi_layout_get_surface_from_id,
@@ -2976,6 +3109,7 @@ static struct ivi_controller_interface ivi_controller_interface = {
 	.layer_set_orientation			= ivi_layout_layer_set_orientation,
 	.layer_get_orientation			= ivi_layout_layer_get_orientation,
 	.layer_add_surface			= ivi_layout_layer_add_surface,
+	.layer_set_zorder               = ivi_layout_layer_set_zorder,
 	.layer_remove_surface			= ivi_layout_layer_remove_surface,
 	.layer_set_render_order			= ivi_layout_layer_set_render_order,
 	.layer_add_notification			= ivi_layout_layer_add_notification,

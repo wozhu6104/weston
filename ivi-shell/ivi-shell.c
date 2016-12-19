@@ -192,6 +192,8 @@ static const struct ivi_surface_interface surface_implementation = {
  * \param resource The ivi_application protocol object.
  * \param id_surface The IVI surface ID.
  * \param surface_resource The wl_surface protocol object.
+ * \param window_title The ivi_layout_surface name.
+ * \param zorder The ivi_layout_surface zorder in a layer.
  * \param id The protocol object id for the new ivi_surface protocol object.
  *
  * The wl_surface is given the ivi_surface role and associated with a unique
@@ -218,7 +220,6 @@ application_surface_create(struct wl_client *client,
 				    resource, IVI_APPLICATION_ERROR_ROLE) < 0)
 		return;
 
-	weston_log("layout_surface: (%s) id_surface(%d) zorder(%d) \n", window_title, id_surface, zorder);
 	layout_surface = ivi_layout_surface_create(weston_surface, id_surface, window_title, zorder);
 
 	/* check if id_ivi is already used for wl_surface*/
@@ -230,7 +231,6 @@ application_surface_create(struct wl_client *client,
 		return;
 	}
 
-	weston_log("layout_surface: (%s) id_surface(%d) zorder(%d) \n", layout_surface->window_title, layout_surface->id_surface, layout_surface->zorder);
 	ivisurf = zalloc(sizeof *ivisurf);
 	if (ivisurf == NULL) {
 		wl_resource_post_no_memory(resource);
@@ -274,8 +274,22 @@ application_surface_create(struct wl_client *client,
 				       ivisurf, shell_destroy_shell_surface);
 }
 
+/**
+ * Set zorder of an app.
+ *
+ */
+static void
+application_set_zorder(struct wl_client *client,
+					   struct wl_resource *resource,
+					   const char *window_title,
+					   uint32_t zorder)
+{
+	ivi_layout_surface_set_zorder(window_title, zorder);
+}
+
 static const struct ivi_application_interface application_implementation = {
-	application_surface_create
+	application_surface_create,
+	application_set_zorder
 };
 
 /*

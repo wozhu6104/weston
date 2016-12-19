@@ -586,6 +586,26 @@ set_notification_configure_surface(struct ivi_layout_surface *ivisurf,
 }
 
 /**
+ * Internal set notification
+ */
+static void
+set_notification_set_zorder(struct ivi_layout_surface *ivisurf,
+				void *userdata)
+{
+	struct hmi_controller *hmi_ctrl = userdata;
+	struct ivi_layout_layer *application_layer =
+		hmi_ctrl->application_layer.ivilayer;
+	int32_t ret = 0;
+
+	/* skip ui widgets */
+	if (is_surf_in_ui_widget(hmi_ctrl, ivisurf))
+		return;
+
+	ret = ivi_controller_interface->layer_set_zorder(application_layer, ivisurf);
+	assert(!ret);
+}
+
+/**
  * A hmi_controller used 4 ivi_layers to manage ivi_surfaces. The IDs of
  * corresponding ivi_layer are defined in weston.ini. Default scene graph
  * of ivi_layers are initialized in hmi_controller_create
@@ -753,6 +773,11 @@ hmi_controller_create(struct weston_compositor *ec)
 		set_notification_remove_surface, hmi_ctrl);
 	ivi_controller_interface->add_notification_configure_surface(
 		set_notification_configure_surface, hmi_ctrl);
+
+	weston_log("add_notification_set_zorder: 0\n");
+	ivi_controller_interface->add_notification_set_zorder(
+		set_notification_set_zorder, hmi_ctrl);
+	weston_log("add_notification_set_zorder: 1\n");
 
 	hmi_ctrl->destroy_listener.notify = hmi_controller_destroy;
 	wl_signal_add(&hmi_ctrl->compositor->destroy_signal,
