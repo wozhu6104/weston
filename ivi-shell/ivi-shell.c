@@ -125,6 +125,28 @@ ivi_shell_surface_configure(struct weston_surface *surface,
 					     surface->width, surface->height);
 	}
 }
+static void
+ivi_shell_surface_set_zorder(struct weston_surface *surface, char *window_title, int32_t zorder)
+{
+	struct ivi_layout *layout = get_instance();
+	struct ivi_shell_surface *ivi_shell_surf = get_ivi_shell_surface(surface);
+	struct ivi_layout_surface *ivisurf = NULL;
+
+	if(!strcmp(ivi_shell_surf->layout_surface->window_title, window_title)) {
+		ivi_shell_surf->layout_surface->zorder = zorder;
+		ivisurf = ivi_shell_surf->layout_surface;
+		wl_signal_emit(&layout->surface_notification.zorder_changed, ivisurf);
+	} else {
+		wl_list_for_each(ivisurf, &layout->surface_list, link) {
+			if(ivisurf->window_title){
+				if (!strcmp(ivisurf->window_title, window_title)) {
+					ivisurf->zorder = zorder;
+					wl_signal_emit(&layout->surface_notification.zorder_changed, ivisurf);
+				}
+			}
+		}
+	}
+}
 
 /*
  * The ivi_surface wl_resource destructor.
@@ -260,6 +282,7 @@ application_surface_create(struct wl_client *client,
 	ivisurf->surface = weston_surface;
 
 	weston_surface->configure = ivi_shell_surface_configure;
+	weston_surface->set_zorder = ivi_shell_surface_set_zorder;
 	weston_surface->configure_private = ivisurf;
 
 	res = wl_resource_create(client, &ivi_surface_interface, 1, id);

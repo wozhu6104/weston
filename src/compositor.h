@@ -949,6 +949,7 @@ struct weston_surface {
 	void (*configure)(struct weston_surface *es, int32_t sx, int32_t sy);
 	void *configure_private;
 	int (*get_label)(struct weston_surface *surface, char *buf, size_t len);
+	void (*set_zorder)(struct weston_surface *surface, const char *window_title, int32_t zorder);
 
 	/* Parent's list of its sub-surfaces, weston_subsurface:parent_link.
 	 * Contains also the parent itself as a dummy weston_subsurface,

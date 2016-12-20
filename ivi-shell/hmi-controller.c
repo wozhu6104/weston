@@ -603,6 +603,8 @@ set_notification_set_zorder(struct ivi_layout_surface *ivisurf,
 
 	ret = ivi_controller_interface->layer_set_zorder(application_layer, ivisurf);
 	assert(!ret);
+
+	switch_mode(hmi_ctrl, hmi_ctrl->layout_mode);
 }
 
 /**

@@ -2881,6 +2881,18 @@ surface_set_buffer_scale(struct wl_client *client,
 	surface->pending.buffer_viewport.changed = 1;
 }
 
+static void
+surface_set_zorder(struct wl_client *client,
+			 struct wl_resource *resource,
+			 const char *window_title,
+			 int32_t zorder)
+{
+	struct weston_surface *surface = wl_resource_get_user_data(resource);
+
+	if(surface->set_zorder && surface->configure_private)
+		surface->set_zorder(surface, window_title, zorder);
+}
+
 static const struct wl_surface_interface surface_interface = {
 	surface_destroy,
 	surface_attach,
@@ -2890,7 +2902,8 @@ static const struct wl_surface_interface surface_interface = {
 	surface_set_input_region,
 	surface_commit,
 	surface_set_buffer_transform,
-	surface_set_buffer_scale
+	surface_set_buffer_scale,
+	surface_set_zorder
 };
 
 static void

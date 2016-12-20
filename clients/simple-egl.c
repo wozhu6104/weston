@@ -369,7 +369,7 @@ create_ivi_surface(struct window *window, struct display *display)
 		abort();
 	}
 
-	ivi_application_set_zorder(display->ivi_application, "simple-egl", 30);
+//	ivi_application_set_zorder(display->ivi_application, "simple-egl", 30);
 
 	ivi_surface_add_listener(window->ivi_surface,
 				 &ivi_surface_listener, window);
@@ -400,6 +400,8 @@ create_surface(struct window *window)
 	} else {
 		assert(0);
 	}
+
+	wl_surface_set_zorder(window->surface, "simple-egl", 30);
 
 	ret = eglMakeCurrent(window->display->egl.dpy, window->egl_surface,
 			     window->egl_surface, window->display->egl.ctx);
