@@ -244,6 +244,8 @@ struct weston_output {
 			  uint16_t *b);
 
 	struct weston_timeline_object timeline;
+
+	bool is_bg_draw;
 };
 
 struct weston_pointer_grab;
@@ -693,6 +695,7 @@ struct weston_compositor {
 	int32_t repaint_msec;
 
 	int exit_code;
+	bool is_bg_set;
 };
 
 struct weston_buffer {
@@ -853,6 +856,8 @@ struct weston_view {
 
 	/* Per-surface Presentation feedback flags, controlled by backend. */
 	uint32_t psf_flags;
+
+	uint32_t id;
 };
 
 struct weston_surface_state {

@@ -1999,7 +1999,7 @@ gl_renderer_la_SOURCES = \
 	src/vertex-clipping.h
 
 x11_backend_la_LDFLAGS = -module -avoid-version
-x11_backend_la_LIBADD = $(COMPOSITOR_LIBS) $(X11_COMPOSITOR_LIBS) \
+x11_backend_la_LIBADD = $(COMPOSITOR_LIBS) $(X11_COMPOSITOR_LIBS) $(EGL_LIBS) \
 	libshared-cairo.la
 
 x11_backend_la_CFLAGS = \

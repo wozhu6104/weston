@@ -24,6 +24,10 @@
 
 #include "config.h"
 
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include "gl-renderer.h"
+
 #include <assert.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -753,6 +757,318 @@ x11_output_init_shm(struct x11_compositor *c, struct x11_output *output,
 	return 0;
 }
 
+static const char vertex_shader[] =
+	"uniform mat4 proj;\n"
+	"attribute vec2 position;\n"
+	"attribute vec2 texcoord;\n"
+	"varying vec2 v_texcoord;\n"
+	"void main()\n"
+	"{\n"
+	"   gl_Position = proj * vec4(position, 0.0, 1.0);\n"
+	"   v_texcoord = texcoord;\n"
+	"}\n";
+
+/* Declare common fragment shader uniforms */
+#define FRAGMENT_CONVERT_YUV						\
+	"  y *= alpha;\n"						\
+	"  u *= alpha;\n"						\
+	"  v *= alpha;\n"						\
+	"  gl_FragColor.r = y + 1.59602678 * v;\n"			\
+	"  gl_FragColor.g = y - 0.39176229 * u - 0.81296764 * v;\n"	\
+	"  gl_FragColor.b = y + 2.01723214 * u;\n"			\
+	"  gl_FragColor.a = alpha;\n"
+
+static const char fragment_debug[] =
+	"  gl_FragColor = vec4(0.0, 0.3, 0.0, 0.2) + gl_FragColor * 0.8;\n";
+
+static const char fragment_brace[] =
+	"}\n";
+
+static int
+compile_shader(GLenum type, int count, const char **sources)
+{
+	GLuint s;
+	char msg[512];
+	GLint status;
+
+	s = glCreateShader(type);
+	glShaderSource(s, count, sources, NULL);
+	glCompileShader(s);
+	glGetShaderiv(s, GL_COMPILE_STATUS, &status);
+	if (!status) {
+		glGetShaderInfoLog(s, sizeof msg, NULL, msg);
+		weston_log("shader info: %s\n", msg);
+		return GL_NONE;
+	}
+
+	return s;
+}
+static int
+shader_init(struct gl_shader *shader, struct gl_renderer *renderer,
+		   const char *vertex_source, const char *fragment_source)
+{
+	char msg[512];
+	GLint status;
+	int count;
+	const char *sources[3];
+
+	shader->vertex_shader =
+		compile_shader(GL_VERTEX_SHADER, 1, &vertex_source);
+
+	if (renderer->fragment_shader_debug) {
+		sources[0] = fragment_source;
+		sources[1] = fragment_debug;
+		sources[2] = fragment_brace;
+		count = 3;
+	} else {
+		sources[0] = fragment_source;
+		sources[1] = fragment_brace;
+		count = 2;
+	}
+
+	shader->fragment_shader =
+		compile_shader(GL_FRAGMENT_SHADER, count, sources);
+
+	shader->program = glCreateProgram();
+	glAttachShader(shader->program, shader->vertex_shader);
+	glAttachShader(shader->program, shader->fragment_shader);
+	glBindAttribLocation(shader->program, 0, "position");
+	glBindAttribLocation(shader->program, 1, "texcoord");
+
+	glLinkProgram(shader->program);
+	glGetProgramiv(shader->program, GL_LINK_STATUS, &status);
+	if (!status) {
+		glGetProgramInfoLog(shader->program, sizeof msg, NULL, msg);
+		weston_log("link info: %s\n", msg);
+		return -1;
+	}
+
+	shader->proj_uniform = glGetUniformLocation(shader->program, "proj");
+	shader->tex_uniforms[0] = glGetUniformLocation(shader->program, "tex");
+	shader->tex_uniforms[1] = glGetUniformLocation(shader->program, "tex1");
+	shader->tex_uniforms[2] = glGetUniformLocation(shader->program, "tex2");
+	shader->alpha_uniform = glGetUniformLocation(shader->program, "alpha");
+	shader->color_uniform = glGetUniformLocation(shader->program, "color");
+
+	return 0;
+}
+
+static void
+use_shader(struct gl_renderer *gr, struct gl_shader *shader)
+{
+	if (!shader->program) {
+		int ret;
+
+		ret =  shader_init(shader, gr,
+				   shader->vertex_source,
+				   shader->fragment_source);
+
+		if (ret < 0)
+			weston_log("warning: failed to compile shader\n");
+	}
+
+	if (gr->current_shader == shader)
+		return;
+	glUseProgram(shader->program);
+	gr->current_shader = shader;
+}
+struct window{
+	struct {
+		GLuint rotation_uniform;
+		GLuint pos;
+		GLuint col;
+	} gl;
+};
+
+static const char *vert_shader_text =
+	"uniform mat4 rotation;\n"
+	"attribute vec4 pos;\n"
+	"attribute vec4 color;\n"
+	"varying vec4 v_color;\n"
+	"void main() {\n"
+	"  gl_Position = rotation * pos;\n"
+	"  v_color = color;\n"
+	"}\n";
+
+static const char *frag_shader_text =
+	"precision mediump float;\n"
+	"varying vec4 v_color;\n"
+	"void main() {\n"
+	"  gl_FragColor = v_color;\n"
+	"}\n";
+
+static GLuint
+create_shader(struct window *window, const char *source, GLenum shader_type)
+{
+	GLuint shader;
+	GLint status;
+
+	shader = glCreateShader(shader_type);
+	assert(shader != 0);
+
+	glShaderSource(shader, 1, (const char **) &source, NULL);
+	glCompileShader(shader);
+
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+	if (!status) {
+		char log[1000];
+		GLsizei len;
+		glGetShaderInfoLog(shader, 1000, &len, log);
+		fprintf(stderr, "Error: compiling %s: %*s\n",
+			shader_type == GL_VERTEX_SHADER ? "vertex" : "fragment",
+			len, log);
+		exit(1);
+	}
+
+	return shader;
+}
+
+static void
+init_gl(struct window *window)
+{
+	GLuint frag, vert;
+	GLuint program;
+	GLint status;
+
+	frag = create_shader(window, frag_shader_text, GL_FRAGMENT_SHADER);
+	vert = create_shader(window, vert_shader_text, GL_VERTEX_SHADER);
+
+	program = glCreateProgram();
+	glAttachShader(program, frag);
+	glAttachShader(program, vert);
+	glLinkProgram(program);
+
+	glGetProgramiv(program, GL_LINK_STATUS, &status);
+	if (!status) {
+		char log[1000];
+		GLsizei len;
+		glGetProgramInfoLog(program, 1000, &len, log);
+		fprintf(stderr, "Error: linking:\n%*s\n", len, log);
+		exit(1);
+	}
+
+	glUseProgram(program);
+
+	window->gl.pos = 0;
+	window->gl.col = 1;
+
+	glBindAttribLocation(program, window->gl.pos, "pos");
+	glBindAttribLocation(program, window->gl.col, "color");
+	glLinkProgram(program);
+
+	window->gl.rotation_uniform =
+		glGetUniformLocation(program, "rotation");
+}
+void testrender(struct weston_output *output)
+{
+	struct gl_output_state *go = get_output_state(output);
+	struct weston_compositor *compositor = output->compositor;
+	struct gl_renderer *gr = get_renderer(compositor);
+	struct gl_shader *shader = &gr->texture_shader_rgba;
+	unsigned short color[4]={ 0xF800, 0x7E0, 0x1F, 0xffff };
+	unsigned int embTex[400*400];
+	struct weston_matrix matrix;
+	int i,j;
+
+    for ( i = 0; i < 128; ++i )
+    {
+        for ( j = 0; j < 128; ++j )
+        {
+            embTex[i*128+j] = color[(i/32 + j/32)%4];
+        }
+    }
+
+	/*
+	glDisable(GL_BLEND);
+	use_shader(gr, shader);
+
+	glViewport(0, 0, 400, 400);
+
+	weston_matrix_init(&matrix);
+	weston_matrix_translate(&matrix, -400/2.0, -400/2.0, 0);
+	weston_matrix_scale(&matrix, 2.0/400, -2.0/400, 1);
+	glUniformMatrix4fv(shader->proj_uniform, 1, GL_FALSE, matrix.d);
+
+	glUniform1i(shader->tex_uniforms[0], 0);
+	glUniform1f(shader->alpha_uniform, 1);
+	glActiveTexture(GL_TEXTURE0);
+
+	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB,  128, 128 , 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, embTex);
+
+	GLfloat texcoord[] = {
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+		0.0f, 1.0f,
+	};
+
+	GLfloat verts[] = {
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+		0.0f, 1.0f,
+	};
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, verts);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, texcoord);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+
+	glDrawArrays( GL_TRIANGLE_FAN, 0, 4);
+
+	eglSwapBuffers(gr->egl_display, go->egl_surface);
+*/
+
+	struct window window;
+	init_gl(&window);
+	static const GLfloat verts[4][2] = {
+		{ -1, -1 },
+		{  -1,  1 },
+		{  1,  -1 },
+		{  1, 1 }
+	};
+	static const GLfloat colors[3][3] = {
+		{ 1, 0, 0 },
+		{ 0, 1, 0 },
+		{ 0, 0, 1 },
+	};
+	GLfloat angle;
+	GLfloat rotation[4][4] = {
+		{ 1, 0, 0, 0 },
+		{ 0, 1, 0, 0 },
+		{ 0, 0, 1, 0 },
+		{ 0, 0, 0, 1 }
+	};
+
+	rotation[0][0] =  cos(angle);
+	rotation[0][2] =  sin(angle);
+	rotation[2][0] = -sin(angle);
+	rotation[2][2] =  cos(angle);
+
+	glViewport(0, 0, 1024, 640);
+
+	glUniformMatrix4fv(window.gl.rotation_uniform, 1, GL_FALSE,
+			   (GLfloat *) rotation);
+
+	glClearColor(0.0, 0.0, 0.0, 0.5);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glVertexAttribPointer(window.gl.pos, 2, GL_FLOAT, GL_FALSE, 0, verts);
+	glVertexAttribPointer(window.gl.col, 3, GL_FLOAT, GL_FALSE, 0, colors);
+	glEnableVertexAttribArray(window.gl.pos);
+	glEnableVertexAttribArray(window.gl.col);
+
+//	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB,  128, 128 , 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, embTex);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+
+	eglSwapBuffers(gr->egl_display, go->egl_surface);
+
+
+	sleep(1);
+	weston_log("zhaowei %s %d \n", __func__, __LINE__);
+}
+
 static struct x11_output *
 x11_compositor_create_output(struct x11_compositor *c, int x, int y,
 			     int width, int height, int fullscreen,
@@ -920,6 +1236,8 @@ x11_compositor_create_output(struct x11_compositor *c, int x, int y,
 
 	weston_log("x11 output %dx%d, window id %d\n",
 		   width, height, output->window);
+
+	testrender(&output->base);
 
 	return output;
 }

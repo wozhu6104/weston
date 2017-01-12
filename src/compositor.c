@@ -2265,6 +2265,9 @@ weston_output_take_feedback_list(struct weston_output *output,
 	wl_list_init(&surface->feedback_list);
 }
 
+
+#define BACK_GROUND_VIEW_ID 0x1234
+#define BACK_GROUND_VIEW_OK 1
 static int
 weston_output_repaint(struct weston_output *output)
 {
@@ -2274,10 +2277,19 @@ weston_output_repaint(struct weston_output *output)
 	struct weston_frame_callback *cb, *cnext;
 	struct wl_list frame_callback_list;
 	pixman_region32_t output_damage;
-	int r;
+	int r = 1;
+	static int is_back_ground_view_ok = 0;
 
 	if (output->destroying)
 		return 0;
+
+	wl_list_for_each(ev, &ec->view_list, link) {
+		if(ev->id == BACK_GROUND_VIEW_ID)
+			is_back_ground_view_ok ++;
+	}
+//	sleep(1);
+
+	weston_log("zhaowei %s %d view(%d) \n", __func__, __LINE__, is_back_ground_view_ok);
 
 	TL_POINT("core_repaint_begin", TLP_OUTPUT(output), TLP_END);
 
@@ -2318,6 +2330,11 @@ weston_output_repaint(struct weston_output *output)
 	if (output->dirty)
 		weston_output_update_matrix(output);
 
+	if(is_back_ground_view_ok > BACK_GROUND_VIEW_OK)
+	{
+		output->is_bg_draw = true;
+		is_back_ground_view_ok = BACK_GROUND_VIEW_OK + 1;
+	}
 	r = output->repaint(output, &output_damage);
 
 	pixman_region32_fini(&output_damage);
@@ -2339,6 +2356,7 @@ weston_output_repaint(struct weston_output *output)
 
 	TL_POINT("core_repaint_posted", TLP_OUTPUT(output), TLP_END);
 
+	weston_log("zhaowei %s %d %d \n", __func__, __LINE__, r);
 	return r;
 }
 
@@ -2380,7 +2398,7 @@ output_repaint_timer_handler(void *data)
 
 	if (output->repaint_needed &&
 	    compositor->state != WESTON_COMPOSITOR_SLEEPING &&
-	    compositor->state != WESTON_COMPOSITOR_OFFSCREEN &&
+		compositor->state != WESTON_COMPOSITOR_OFFSCREEN &&
 	    weston_output_repaint(output) == 0)
 		return 0;
 
@@ -2427,6 +2445,7 @@ weston_output_finish_frame(struct weston_output *output,
 		msec = 0;
 	}
 
+	weston_log("zhaowei %s %d msec(%d) \n", __func__, __LINE__, msec);
 	if (msec < 1)
 		output_repaint_timer_handler(output);
 	else

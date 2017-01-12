@@ -4392,6 +4392,7 @@ background_configure(struct weston_surface *es, int32_t sx, int32_t sy)
 	configure_static_view(view, &shell->background_layer);
 }
 
+#define BACK_GROUND_VIEW_ID 0x1234
 static void
 desktop_shell_set_background(struct wl_client *client,
 			     struct wl_resource *resource,
@@ -4423,6 +4424,8 @@ desktop_shell_set_background(struct wl_client *client,
 				     surface_resource,
 				     surface->output->width,
 				     surface->output->height);
+
+	view->id = BACK_GROUND_VIEW_ID;
 }
 
 static int
