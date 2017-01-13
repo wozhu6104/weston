@@ -1170,10 +1170,10 @@ void testrender(struct weston_output *output)
 	createTexture();
 
 	static const GLfloat verts[4][2] = {
-		-1.0f,-1.0f,
 		-1.0f, 1.0f,
-		1.0f, -1.0f,
-		1.0f, 1.0f
+		-1.0f,-1.0f,
+		1.0f, 1.0f,
+		1.0f, -1.0f
 	};
 	static const GLfloat colors[4][2] = {
 		0.0f,1.0f,
@@ -1189,12 +1189,12 @@ void testrender(struct weston_output *output)
 		{ 0, 0, 0, 1 }
 	};
 
-	GLfloat color[] = {
-	   1.0f,0.0f,0.0f,
-	   0.0f,1.0f,0.0f,
-	   0.0f,0.0f,1.0f,
-	   1.0f,1.0f,0.0f
-	};
+//	GLfloat color[] = {
+//	   1.0f,0.0f,0.0f,
+//	   0.0f,1.0f,0.0f,
+//	   0.0f,0.0f,1.0f,
+//	   1.0f,1.0f,0.0f
+//	};
 
 	rotation[0][0] =  cos(angle);
 	rotation[0][2] =  sin(angle);
@@ -1203,17 +1203,17 @@ void testrender(struct weston_output *output)
 
 	glViewport(0, 0, 1024, 640);
 
-	glUniformMatrix4fv(window.gl.rotation_uniform, 1, GL_FALSE,
-			   (GLfloat *) rotation);
+//	glUniformMatrix4fv(window.gl.rotation_uniform, 1, GL_FALSE,
+//			   (GLfloat *) rotation);
 
 	glClearColor(0.0, 0.0, 0.0, 0.5);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glVertexAttribPointer(window.gl.pos, 2, GL_FLOAT, GL_FALSE, 0, verts);
-	glVertexAttribPointer(window.gl.col, 2, GL_FLOAT, GL_FALSE, 0, colors);
-	glVertexAttribPointer(window.gl.text, 3, GL_FLOAT, 0, 0, color );
+//	glVertexAttribPointer(window.gl.col, 2, GL_FLOAT, GL_FALSE, 0, colors);
+	glVertexAttribPointer(window.gl.text, 2, GL_FLOAT, 0, 0, colors );
 	glEnableVertexAttribArray(window.gl.pos);
-	glEnableVertexAttribArray(window.gl.col);
+//	glEnableVertexAttribArray(window.gl.col);
 	glEnableVertexAttribArray(window.gl.text);
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
