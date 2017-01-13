@@ -761,6 +761,7 @@ static const char vertex_shader[] =
 	"uniform mat4 proj;\n"
 	"attribute vec2 position;\n"
 	"attribute vec2 texcoord;\n"
+	"attribute vec2 g_vTexCoord;\n"
 	"varying vec2 v_texcoord;\n"
 	"void main()\n"
 	"{\n"
@@ -834,6 +835,7 @@ shader_init(struct gl_shader *shader, struct gl_renderer *renderer,
 	glAttachShader(shader->program, shader->fragment_shader);
 	glBindAttribLocation(shader->program, 0, "position");
 	glBindAttribLocation(shader->program, 1, "texcoord");
+	glBindAttribLocation(shader->program, 2, "texcoord");
 
 	glLinkProgram(shader->program);
 	glGetProgramiv(shader->program, GL_LINK_STATUS, &status);
@@ -877,6 +879,7 @@ struct window{
 		GLuint rotation_uniform;
 		GLuint pos;
 		GLuint col;
+		GLuint text;
 	} gl;
 };
 
@@ -884,17 +887,20 @@ static const char *vert_shader_text =
 	"uniform mat4 rotation;\n"
 	"attribute vec4 pos;\n"
 	"attribute vec4 color;\n"
+	"attribute vec2 g_vTexCoord;    \n"
 	"varying vec4 v_color;\n"
+	"varying vec2 g_vVSTexCoord;\n"
 	"void main() {\n"
-	"  gl_Position = rotation * pos;\n"
-	"  v_color = color;\n"
+	"  gl_Position = pos;\n"
+	"    g_vVSTexCoord = g_vTexCoord;    \n"
 	"}\n";
 
 static const char *frag_shader_text =
 	"precision mediump float;\n"
-	"varying vec4 v_color;\n"
+	"uniform sampler2D vTexture;\n"
+	"varying vec2 g_vVSTexCoord;\n"
 	"void main() {\n"
-	"  gl_FragColor = v_color;\n"
+	"  gl_FragColor=texture2D(vTexture,g_vVSTexCoord);\n"
 	"}\n";
 
 static GLuint
@@ -922,7 +928,141 @@ create_shader(struct window *window, const char *source, GLenum shader_type)
 
 	return shader;
 }
+// bmp file headerdefine.
+typedef struct tagBITMAPFILEHEADER{
+  unsigned short bfType;
+  unsigned int   bfSize;
+  unsigned short bfReserved1;
+  unsigned short bfReserved2;
+  unsigned int   bfOffBits;
+}__attribute__((packed)) BITMAPFILEHEADER;
 
+// bmp info header define.
+typedef struct tagBITMAPINFOHEADER{
+  unsigned int biSize;
+  int biWidth;
+  int biHeight;
+  unsigned short biPlanes;
+  unsigned short biBitCount;
+  unsigned int   biCompression;
+  unsigned int   biSizeImage;
+  int  biXPelsPerMeter;
+  int  biYpelsPerMeter;
+  unsigned int biClrUsed;
+  unsigned int biClrImportant;
+}__attribute__((packed)) BITMAPINFOHEADER;
+
+typedef struct tagImage{
+  GLubyte *imageData;
+  GLuint  bpp;
+  GLuint  width;
+  GLuint  height;
+  GLuint  textID;
+}TAGImage;
+TAGImage texture;
+void loadBmpFile(char *filename)
+{
+  BITMAPFILEHEADER bmpFileHeader;//bmp file header.
+  BITMAPINFOHEADER bmpInfoHeader;//bmp info header.
+  GLuint imageSize;
+  GLuint temp;
+  GLuint type = GL_RGB;
+
+
+  weston_log("-----loadBmp.cpp,justclearbmp------\n");
+  FILE  *file = fopen(filename,"r");
+  if(file == NULL){
+      return ;
+  }
+
+
+  weston_log("-----loadBmp.cpp,openfile:%s,success.------\n",filename);
+  int n =-1;
+  n= fread(&bmpFileHeader,1,sizeof(BITMAPFILEHEADER),file);//read file head.
+  if(bmpFileHeader.bfType != 0x4d42)
+    return ;
+
+  weston_log("-----loadBmp.cpp,readhead,success.------\n");
+  n=fread(&bmpInfoHeader,1,sizeof(BITMAPINFOHEADER),file);//read file info.
+  weston_log("-----loadBmp.cpp,readfileinfo,success.------\n");
+
+  weston_log("-----loadBMp.cpp,sizeof head:%d\n",sizeof(BITMAPFILEHEADER));
+  weston_log("-----loadBMp.cpp,sizeof info:%d\n",sizeof(BITMAPINFOHEADER));
+  texture.width  = bmpInfoHeader.biWidth;// image width.
+  texture.height = bmpInfoHeader.biHeight;//image height.
+  texture.bpp    = bmpInfoHeader.biBitCount;//bit depth.
+  imageSize       = bmpInfoHeader.biSizeImage;//image  size.
+
+  weston_log("iwidth is:%d\n",texture.width);
+  weston_log("iHeight is:%d\n",texture.height);
+  weston_log("Count is:%d\n",texture.bpp);
+  weston_log("SizeImage is:%d\n",imageSize);
+
+  if(texture.width <=0 ||
+     texture.height<=0 ||
+     texture.bpp != 24)
+  {
+     fclose(file);
+     return ;
+  }
+
+   weston_log("-----loadBmp.cpp done.------\n");
+
+  //get true size.
+  fseek(file,0,SEEK_END);
+  int total_size = ftell(file);
+  // jump to the real image data pos.
+  fseek(file,bmpFileHeader.bfOffBits,SEEK_SET);
+  int curr_size = ftell(file);
+  imageSize = total_size - curr_size;
+
+  weston_log("curr_size is:%d,total_size is:%d,imagesize:%d\n",
+                  curr_size,total_size,imageSize);
+
+  texture.imageData = (GLubyte *)malloc(imageSize);
+  //check the memory exists or match filememory size.
+  if(texture.imageData == NULL ||
+     fread(texture.imageData,1,imageSize,file) != imageSize)
+  {
+     if(texture.imageData != NULL)
+        free(texture.imageData);
+     fclose(file);
+     return ;
+  }
+
+  weston_log("-----loadBmp.cpp,filememory malloc success.------\n");
+  //loop image data,swaps R B.
+  GLuint i;
+  for(i = 0 ; i < imageSize; i += 3){
+    temp = texture.imageData[i];
+    texture.imageData[i]   = texture.imageData[i+2];
+    texture.imageData[i+2] = temp;
+  }
+
+  //finish read bmp file.
+  fclose(file);
+}
+
+int createTexture(){
+    int Texture;
+    //生成纹理
+    glGenTextures(1,&Texture);
+    //生成纹理
+    glBindTexture(GL_TEXTURE_2D,&Texture);
+    //设置缩小过滤为使用纹理中坐标最接近的一个像素的颜色作为需要绘制的像素颜色
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //设置放大过滤为使用纹理中坐标最接近的若干个颜色，通过加权平均算法得到需要绘制的像素颜色
+    glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    //设置环绕方向S，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+    //设置环绕方向T，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+    //根据以上指定的参数，生成一个2D纹理
+
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB,  texture.width, texture.height , 0, GL_RGB, GL_UNSIGNED_BYTE, texture.imageData);
+
+    return Texture;
+}
 static void
 init_gl(struct window *window)
 {
@@ -951,9 +1091,11 @@ init_gl(struct window *window)
 
 	window->gl.pos = 0;
 	window->gl.col = 1;
+	window->gl.text = 2;
 
 	glBindAttribLocation(program, window->gl.pos, "pos");
 	glBindAttribLocation(program, window->gl.col, "color");
+	glBindAttribLocation(program, window->gl.text, "g_vTexCoord");
 	glLinkProgram(program);
 
 	window->gl.rotation_uniform =
@@ -964,10 +1106,12 @@ void testrender(struct weston_output *output)
 	struct gl_output_state *go = get_output_state(output);
 	struct weston_compositor *compositor = output->compositor;
 	struct gl_renderer *gr = get_renderer(compositor);
-	struct gl_shader *shader = &gr->texture_shader_rgba;
-	unsigned short color[4]={ 0xF800, 0x7E0, 0x1F, 0xffff };
+
+	/*
+//	struct gl_shader *shader = &gr->texture_shader_rgba;
+//	unsigned short color[4]={ 0xF800, 0x7E0, 0x1F, 0xffff };
 	unsigned int embTex[400*400];
-	struct weston_matrix matrix;
+//	struct weston_matrix matrix;
 	int i,j;
 
     for ( i = 0; i < 128; ++i )
@@ -978,7 +1122,6 @@ void testrender(struct weston_output *output)
         }
     }
 
-	/*
 	glDisable(GL_BLEND);
 	use_shader(gr, shader);
 
@@ -1021,16 +1164,22 @@ void testrender(struct weston_output *output)
 
 	struct window window;
 	init_gl(&window);
+
+	loadBmpFile("bmp.bmp");
+
+	createTexture();
+
 	static const GLfloat verts[4][2] = {
-		{ -1, -1 },
-		{  -1,  1 },
-		{  1,  -1 },
-		{  1, 1 }
+		-1.0f,-1.0f,
+		-1.0f, 1.0f,
+		1.0f, -1.0f,
+		1.0f, 1.0f
 	};
-	static const GLfloat colors[3][3] = {
-		{ 1, 0, 0 },
-		{ 0, 1, 0 },
-		{ 0, 0, 1 },
+	static const GLfloat colors[4][2] = {
+		0.0f,1.0f,
+		0.0f,0.0f,
+		1.0f,1.0f,
+		1.0f,0.0f,
 	};
 	GLfloat angle;
 	GLfloat rotation[4][4] = {
@@ -1038,6 +1187,13 @@ void testrender(struct weston_output *output)
 		{ 0, 1, 0, 0 },
 		{ 0, 0, 1, 0 },
 		{ 0, 0, 0, 1 }
+	};
+
+	GLfloat color[] = {
+	   1.0f,0.0f,0.0f,
+	   0.0f,1.0f,0.0f,
+	   0.0f,0.0f,1.0f,
+	   1.0f,1.0f,0.0f
 	};
 
 	rotation[0][0] =  cos(angle);
@@ -1054,18 +1210,19 @@ void testrender(struct weston_output *output)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glVertexAttribPointer(window.gl.pos, 2, GL_FLOAT, GL_FALSE, 0, verts);
-	glVertexAttribPointer(window.gl.col, 3, GL_FLOAT, GL_FALSE, 0, colors);
+	glVertexAttribPointer(window.gl.col, 2, GL_FLOAT, GL_FALSE, 0, colors);
+	glVertexAttribPointer(window.gl.text, 3, GL_FLOAT, 0, 0, color );
 	glEnableVertexAttribArray(window.gl.pos);
 	glEnableVertexAttribArray(window.gl.col);
+	glEnableVertexAttribArray(window.gl.text);
 
-//	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB,  128, 128 , 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, embTex);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 
 	eglSwapBuffers(gr->egl_display, go->egl_surface);
 
 
-	sleep(1);
+	sleep(10);
 	weston_log("zhaowei %s %d \n", __func__, __LINE__);
 }
 
