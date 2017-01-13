@@ -59,7 +59,7 @@ struct pixman_renderer {
 	struct wl_signal destroy_signal;
 };
 
-inline struct pixman_output_state *
+static inline struct pixman_output_state *
 get_output_state(struct weston_output *output)
 {
 	return (struct pixman_output_state *)output->renderer_state;
